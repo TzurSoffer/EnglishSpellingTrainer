@@ -1,11 +1,11 @@
 import random
 import winsound, os
 
-def Dice(Min=1, Max=7):
-    x = int(random.uniform(Min,Max))
-    return x
+def Dice(Min=1, Max=7) -> int:
+    x = int(random.uniform(Min, Max))
+    return int(x)
 
-def Dice_Exclude(Min=1, Max=7, ExList=[]):
+def Dice_Exclude(Min=1, Max=7, ExList=[]) -> int:
     again = True
     while again==True:
         again = False
@@ -13,16 +13,45 @@ def Dice_Exclude(Min=1, Max=7, ExList=[]):
         for ex in ExList:
             if x == ex:
                 again = True
-    return x
+    return int(x)
+
+def getListOfDecoyWords(wordList, excludeWord) -> list:
+    x1 = Dice_Exclude(0, len(wordList), ExList=[excludeWord])
+    x2 = Dice_Exclude(0, len(wordList), ExList=[excludeWord, x1])
+    x3 = Dice_Exclude(0, len(wordList), ExList=[excludeWord, x1, x2])
+    options = [excludeWord, x1,x2,x3]
+    options.sort()
+    return options
+    
+def checkSpelling(word1, word2) -> int:
+    if word1.lower() == word2.lower():
+        playGood()
+        return 1
+    else:
+        playError()
+        return 0
+
+def playFile(filename) -> None:
+    winsound.PlaySound(filename, winsound.SND_FILENAME)
+
+def playGood() -> None:
+    playFile(sound_path +'Good.wav')
+    print('Excellent!\n')
+    
+def playError() -> None:
+    playFile(sound_path +'Error.wav')
+    print('Try again\n')
 
     
 word_path = './Words/'
 sound_path = './Sounds/'
 word_list = os.listdir(word_path)
+
 again = True
 while again == True:
-    level = input('Choose difficulty level (A,B): ')
-    if ((level.lower() == 'a') or (level.lower() == 'b')):
+    level = input('Choose difficulty level (A,B,C): ')
+    level = level.lower()
+    if ((level == 'a') or (level == 'b') or (level == 'c')):
         again = False
     else:
         print('\n')
@@ -36,20 +65,17 @@ while again == True:
     else:
         print('\n')
 
-while (words>0):
-    word_number = Dice(0,len(word_list))
-    if level.lower()=='a':
-        x1 = Dice_Exclude(0,len(word_list), ExList=[word_number])
-        x2 = Dice_Exclude(0,len(word_list), ExList=[word_number, x1])
-        x3 = Dice_Exclude(0,len(word_list), ExList=[word_number, x1, x2])
-        options = [word_number, x1,x2,x3]
-        options.sort()
-        #print options
+while words > 0:
+    word_number = Dice(0, len(word_list)) #< Randomly choose a new word 
+    if level == 'a':
+        ### Print list of options
+        options = getListOfDecoyWords(word_list, word_number)
         for i, op in enumerate(options):
             print('%d. %s'%(i+1, word_list[op].split('.')[0]))
+
         again = True
         while again == True:
-            winsound.PlaySound(word_path+word_list[word_number], winsound.SND_FILENAME)
+            playFile(word_path+word_list[word_number])
             user = input('Choose the word (1,2,3,4): ')
             if user.isdigit():
                 user = int(user) -1
@@ -57,22 +83,26 @@ while (words>0):
                     again = False
 
         user_word = word_list[options[user]].split('.')[0]
-        if user_word == word_list[word_number].split('.')[0]:
-            winsound.PlaySound(sound_path +'Good.wav', winsound.SND_FILENAME)
-            print('Excellent!\n')
-            words -= 1
-        else:
-            winsound.PlaySound(sound_path +'Error.wav', winsound.SND_FILENAME)
-            print('Try again\n')
-    else:
-        winsound.PlaySound(word_path+word_list[word_number], winsound.SND_FILENAME)
-        user_word = input('What was the word? ')
-        if user_word.lower() == (word_list[word_number].split('.')[0]).lower():
-            winsound.PlaySound(sound_path +'Good.wav', winsound.SND_FILENAME)
-            print('Excellent!\n')
-            words -= 1
-        else:
-            winsound.PlaySound(sound_path +'Error.wav', winsound.SND_FILENAME)
-            print('Try again\n')
+        words -= checkSpelling(user_word, word_list[word_number].split('.')[0])
 
-winsound.PlaySound(sound_path +'Finish.wav', winsound.SND_FILENAME)
+    elif level == 'b':
+        ### Print list of options
+        options = getListOfDecoyWords(word_list, word_number)
+        for i, op in enumerate(options):
+            print('- %s'%(word_list[op].split('.')[0]))
+        
+        again = True
+        while again == True:
+            playFile(word_path+word_list[word_number])
+            user_word = input('What was the word? ')
+            words_Z1 = words
+            words -= checkSpelling(user_word, word_list[word_number].split('.')[0])
+            if words != words_Z1:
+                again = False #< Repeat the same word if an error
+
+    else:
+        playFile(word_path+word_list[word_number])
+        user_word = input('Type the word? ')
+        words -= checkSpelling(user_word, word_list[word_number].split('.')[0])
+
+playFile(sound_path +'Finish.wav')
