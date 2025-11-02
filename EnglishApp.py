@@ -1,5 +1,16 @@
-import random
-import winsound, os
+import os, random
+try:
+    import winsound
+    def playFile(filename) -> None:
+        winsound.PlaySound(filename, winsound.SND_FILENAME)
+except:
+    try:
+        import playsound
+        def playFile(filename) -> None:
+            playsound.playsound(filename)
+    except:
+        raise ("No sound support\nPlease <pip install playsound>\nand retry\n")
+            
 
 def Dice(Min=1, Max=7) -> int:
     x = int(random.uniform(Min, Max))
@@ -30,9 +41,6 @@ def checkSpelling(word1, word2) -> int:
     else:
         playError()
         return 0
-
-def playFile(filename) -> None:
-    winsound.PlaySound(filename, winsound.SND_FILENAME)
 
 def playGood() -> None:
     playFile(sound_path +'Good.wav')
