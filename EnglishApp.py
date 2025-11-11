@@ -3,17 +3,18 @@
 
 import os, random
 try:
-    import winsound
+    import winsound   #< prefer builtin over external lib
     def playFile(filename) -> None:
-        winsound.PlaySound(filename, winsound.SND_FILENAME)
-except:
+        path = os.path.normpath(os.path.abspath(filename))
+        winsound.PlaySound(path, winsound.SND_FILENAME)
+except Exception:
     try:
         import playsound
         def playFile(filename) -> None:
-            playsound.playsound(filename)
-    except:
-        raise ("No sound support\nPlease <pip install playsound>\nand retry\n")
-            
+            path = os.path.normpath(os.path.abspath(filename))
+            playsound.playsound(path)
+    except Exception:
+        raise RuntimeError("No sound support\nPlease install playsound (pip install playsound) and retry")
 
 def Dice(Min=1, Max=6) -> int:
     x = int(random.randint(Min, Max))
@@ -47,11 +48,11 @@ def checkSpelling(word1, word2) -> int:
         return 0
 
 def playGood() -> None:
-    playFile(sound_path +'Good.wav')
+    playFile(sound_path+'Good.wav')
     print('Excellent!\n')
     
 def playError() -> None:
-    playFile(sound_path +'Error.wav')
+    playFile(sound_path+'Error.wav')
     print('Try again\n')
 
     
@@ -135,4 +136,4 @@ while words > 0:
         user_word = input('Type the word? ')
         words -= checkSpelling(user_word, word_list[word_number].split('.')[0])
 
-playFile(sound_path +'Finish.wav')
+playFile(sound_path+'Finish.wav')
